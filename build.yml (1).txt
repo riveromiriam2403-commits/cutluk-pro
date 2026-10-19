@@ -1,0 +1,27 @@
+name: Build Cut Luk APK
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - uses: android-actions/setup-android@v3
+      - name: Clone working app
+        run: |
+          rm -rf app build.gradle settings.gradle
+          git clone https://github.com/androiddevnotes/android-hello-world.git temp
+          cp -r temp/. .
+          rm -rf temp .git
+          git init
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Build APK
+        run: chmod +x gradlew && ./gradlew assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CutLuk-Installer
+          path: app/build/outputs/apk/debug/*.apk
